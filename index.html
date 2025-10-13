@@ -7,6 +7,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -404,6 +410,30 @@
             display: block;
         }
 
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error-message {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin: 10px 0;
+            color: #c33;
+        }
+
+        .success-message {
+            background-color: #efe;
+            border: 1px solid #cfc;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin: 10px 0;
+            color: #363;
+        }
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -460,6 +490,8 @@
     </header>
 
     <div class="container">
+        <div id="firebaseStatus"></div>
+
         <section class="tabs-section">
             <button class="tab-btn tab-overview active" data-tab="overview">
                 <i class="fas fa-chart-bar"></i> Vue d'ensemble
@@ -541,14 +573,18 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <!-- Les données seront insérées ici dynamiquement -->
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </section>
 
             <section class="pagination">
                 <div class="pagination-info" id="paginationInfo">
-                    Affichage de 1 à 25 sur 0 entrées
+                    Chargement...
                 </div>
             </section>
         </div>
@@ -587,14 +623,18 @@
                         </tr>
                     </thead>
                     <tbody id="inprogressTableBody">
-                        <!-- Les données seront insérées ici dynamiquement -->
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </section>
 
             <section class="pagination">
                 <div class="pagination-info" id="paginationInprogressInfo">
-                    Affichage de 1 à 25 sur 0 entrées
+                    Chargement...
                 </div>
             </section>
         </div>
@@ -633,14 +673,18 @@
                         </tr>
                     </thead>
                     <tbody id="completedTableBody">
-                        <!-- Les données seront insérées ici dynamiquement -->
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Chargement des données...
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </section>
 
             <section class="pagination">
                 <div class="pagination-info" id="paginationCompletedInfo">
-                    Affichage de 1 à 25 sur 0 entrées
+                    Chargement...
                 </div>
             </section>
         </div>
@@ -666,7 +710,9 @@
                 </form>
 
                 <div id="alertsList">
-                    <!-- Les alertes seront affichées ici -->
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Chargement des alertes...
+                    </div>
                 </div>
             </section>
         </div>
@@ -734,27 +780,25 @@
     </div>
 
     <script>
-        // Données d'exemple
-        let aoData = [
-            { id: 1, daoNumber: 'DAO-2023-001', object: 'Fourniture de matériel informatique', status: 'en cours d\'élaboration', observations: '', exercise: '2023' },
-            { id: 2, daoNumber: 'DAO-2023-002', object: 'Construction bâtiment administratif', status: 'appel d\'offres publié', observations: 'Publication dans le journal officiel', exercise: '2023' },
-            { id: 3, daoNumber: 'DAO-2023-003', object: 'Maintenance des équipements', status: 'examen des offres techniques', observations: '', exercise: '2023' },
-            { id: 4, daoNumber: 'DAO-2024-001', object: 'Acquisition de véhicules', status: 'marché en cours d\'élaboration', observations: '', exercise: '2024' },
-            { id: 5, daoNumber: 'DAO-2024-002', object: 'Services de nettoyage pour les locaux administratifs', status: 'envoyé aux membres de la commission', observations: 'En attente de retour des membres', exercise: '2024' },
-            { id: 6, daoNumber: 'DAO-2023-004', object: 'Étude technique pour le projet d\'infrastructure', status: 'examen des offres financières', observations: 'Analyse en cours par le comité', exercise: '2023' },
-            { id: 7, daoNumber: 'DAO-2024-003', object: 'Fourniture de mobilier de bureau', status: 'marché envoyé à la société pour signature', observations: 'Signature en attente', exercise: '2024' },
-            { id: 8, daoNumber: 'DAO-2023-005', object: 'Prestation de services juridiques', status: 'examen des dossier administratifs et technique', observations: 'Dossiers en cours d\'examen', exercise: '2023' },
-        ];
-
-        // Données pour les alertes
-        let alertData = [];
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5sCeQqy4jBvSj0Abj-Pce64wgwibCPt0",
+            authDomain: "suivi-des-appel-d-offres.firebaseapp.com",
+            projectId: "suivi-des-appel-d-offres",
+            storageBucket: "suivi-des-appel-d-offres.firebasestorage.app",
+            messagingSenderId: "746414783323",
+            appId: "1:746414783323:web:1102545e1ba696c056787e"
+        };
 
         // Variables globales
+        let db;
+        let aoData = [];
+        let alertData = [];
         let currentPage = 1;
         let currentInprogressPage = 1;
         let currentCompletedPage = 1;
         const rowsPerPage = 25;
-        let filteredData = [...aoData];
+        let filteredData = [];
         let currentTab = 'overview';
 
         // Éléments DOM
@@ -787,17 +831,202 @@
         const alertsList = document.getElementById('alertsList');
         const tabButtons = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
+        const firebaseStatus = document.getElementById('firebaseStatus');
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
+        // Initialisation Firebase
+        function initializeFirebase() {
+            try {
+                // Vérifier si Firebase est disponible
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK non chargé');
+                }
+
+                // Initialiser Firebase
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                
+                showMessage('Firebase initialisé avec succès!', 'success');
+                console.log('Firebase initialisé');
+                
+                // Charger les données
+                loadData();
+                setupEventListeners();
+                
+            } catch (error) {
+                console.error('Erreur d\'initialisation Firebase:', error);
+                showMessage('Erreur d\'initialisation Firebase: ' + error.message, 'error');
+                
+                // Charger des données d'exemple en cas d'échec
+                loadSampleData();
+            }
+        }
+
+        // Afficher un message de statut
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.innerHTML = `
+                <strong>${type === 'error' ? '❌ Erreur' : '✅ Succès'}:</strong> ${message}
+            `;
+            firebaseStatus.innerHTML = '';
+            firebaseStatus.appendChild(messageDiv);
+            
+            // Supprimer le message après 5 secondes pour les succès
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 5000);
+            }
+        }
+
+        // Charger les données d'exemple (fallback)
+        function loadSampleData() {
+            showMessage('Chargement des données d\'exemple...', 'info');
+            
+            aoData = [
+                { 
+                    id: '1', 
+                    daoNumber: 'DAO-2023-001', 
+                    object: 'Fourniture de matériel informatique', 
+                    status: 'en cours d\'élaboration', 
+                    observations: '', 
+                    exercise: '2023' 
+                },
+                { 
+                    id: '2', 
+                    daoNumber: 'DAO-2023-002', 
+                    object: 'Construction bâtiment administratif', 
+                    status: 'appel d\'offres publié', 
+                    observations: 'Publication dans le journal officiel', 
+                    exercise: '2023' 
+                },
+                { 
+                    id: '3', 
+                    daoNumber: 'DAO-2023-003', 
+                    object: 'Maintenance des équipements', 
+                    status: 'examen des offres techniques', 
+                    observations: '', 
+                    exercise: '2023' 
+                }
+            ];
+            
+            alertData = [];
+            
+            // Initialiser l'interface avec les données d'exemple
             sortData();
             renderTable();
             renderInprogressTable();
             renderCompletedTable();
             updateAlertDaoSelect();
             renderAlerts();
-            setupEventListeners();
+            
+            showMessage('Données d\'exemple chargées. Les modifications ne seront pas sauvegardées.', 'error');
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFirebase();
         });
+
+        // Charger les données depuis Firebase
+        async function loadData() {
+            try {
+                showMessage('Connexion à Firebase...', 'info');
+                
+                // Vérifier la connexion
+                await db.collection('appelsOffres').limit(1).get();
+                
+                showMessage('Chargement des données...', 'info');
+
+                // Charger les appels d'offres
+                const aoSnapshot = await db.collection('appelsOffres').get();
+                aoData = aoSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                // Charger les alertes
+                const alertsSnapshot = await db.collection('alertes').get();
+                alertData = alertsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                // Initialiser l'interface
+                sortData();
+                renderTable();
+                renderInprogressTable();
+                renderCompletedTable();
+                updateAlertDaoSelect();
+                renderAlerts();
+                
+                // Configurer l'écoute en temps réel
+                setupRealtimeListeners();
+                
+                showMessage(`Données chargées: ${aoData.length} appels d'offres, ${alertData.length} alertes`, 'success');
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                
+                if (error.code === 'failed-precondition') {
+                    showMessage('Erreur: Les règles Firebase ne sont pas configurées. Vérifiez la configuration dans la console Firebase.', 'error');
+                } else if (error.code === 'permission-denied') {
+                    showMessage('Erreur: Permission refusée. Vérifiez les règles Firebase.', 'error');
+                } else {
+                    showMessage('Erreur de connexion à Firebase: ' + error.message, 'error');
+                }
+                
+                // Charger des données d'exemple en cas d'échec
+                loadSampleData();
+            }
+        }
+
+        // Configurer les écouteurs en temps réel
+        function setupRealtimeListeners() {
+            // Écouter les changements sur les appels d'offres
+            db.collection('appelsOffres').onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added' || change.type === 'modified') {
+                        const index = aoData.findIndex(item => item.id === change.doc.id);
+                        if (index !== -1) {
+                            aoData[index] = { id: change.doc.id, ...change.doc.data() };
+                        } else {
+                            aoData.push({ id: change.doc.id, ...change.doc.data() });
+                        }
+                    } else if (change.type === 'removed') {
+                        aoData = aoData.filter(item => item.id !== change.doc.id);
+                    }
+                });
+                
+                sortData();
+                renderTable();
+                renderInprogressTable();
+                renderCompletedTable();
+                updateAlertDaoSelect();
+            }, (error) => {
+                console.error('Erreur écouteur temps réel:', error);
+            });
+
+            // Écouter les changements sur les alertes
+            db.collection('alertes').onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added' || change.type === 'modified') {
+                        const index = alertData.findIndex(item => item.id === change.doc.id);
+                        if (index !== -1) {
+                            alertData[index] = { id: change.doc.id, ...change.doc.data() };
+                        } else {
+                            alertData.push({ id: change.doc.id, ...change.doc.data() });
+                        }
+                    } else if (change.type === 'removed') {
+                        alertData = alertData.filter(item => item.id !== change.doc.id);
+                    }
+                });
+                
+                renderAlerts();
+            }, (error) => {
+                console.error('Erreur écouteur alertes:', error);
+            });
+        }
 
         // Configuration des écouteurs d'événements
         function setupEventListeners() {
@@ -883,7 +1112,7 @@
                                 ${generateStatusOptions(item.status)}
                             </select>
                         </td>
-                        <td class="observations-cell">${item.observations}</td>
+                        <td class="observations-cell">${item.observations || ''}</td>
                         <td>
                             <button class="btn btn-primary edit-btn" data-id="${item.id}">
                                 <i class="fas fa-edit"></i> Modifier
@@ -899,14 +1128,14 @@
                 // Ajouter les écouteurs d'événements pour les boutons d'édition et suppression
                 document.querySelectorAll('.edit-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        const id = parseInt(this.getAttribute('data-id'));
+                        const id = this.getAttribute('data-id');
                         openEditModal(id);
                     });
                 });
                 
                 document.querySelectorAll('.delete-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        const id = parseInt(this.getAttribute('data-id'));
+                        const id = this.getAttribute('data-id');
                         deleteAo(id);
                     });
                 });
@@ -914,7 +1143,7 @@
                 // Ajouter les écouteurs d'événements pour les sélecteurs de statut
                 document.querySelectorAll('.status-select').forEach(select => {
                     select.addEventListener('change', function() {
-                        const id = parseInt(this.getAttribute('data-id'));
+                        const id = this.getAttribute('data-id');
                         const newStatus = this.value;
                         updateStatus(id, newStatus);
                     });
@@ -959,7 +1188,7 @@
                                 ${generateStatusOptions(item.status)}
                             </select>
                         </td>
-                        <td class="observations-cell">${item.observations}</td>
+                        <td class="observations-cell">${item.observations || ''}</td>
                         <td>
                             <button class="btn btn-primary edit-btn" data-id="${item.id}">
                                 <i class="fas fa-edit"></i> Modifier
@@ -975,14 +1204,14 @@
                 // Ajouter les écouteurs d'événements pour les boutons d'édition et suppression
                 document.querySelectorAll('#inprogressTableBody .edit-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        const id = parseInt(this.getAttribute('data-id'));
+                        const id = this.getAttribute('data-id');
                         openEditModal(id);
                     });
                 });
                 
                 document.querySelectorAll('#inprogressTableBody .delete-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        const id = parseInt(this.getAttribute('data-id'));
+                        const id = this.getAttribute('data-id');
                         deleteAo(id);
                     });
                 });
@@ -990,7 +1219,7 @@
                 // Ajouter les écouteurs d'événements pour les sélecteurs de statut
                 document.querySelectorAll('#inprogressTableBody .status-select').forEach(select => {
                     select.addEventListener('change', function() {
-                        const id = parseInt(this.getAttribute('data-id'));
+                        const id = this.getAttribute('data-id');
                         const newStatus = this.value;
                         updateStatus(id, newStatus);
                     });
@@ -1036,7 +1265,7 @@
                                 ${generateStatusOptions(item.status)}
                             </select>
                         </td>
-                        <td class="observations-cell">${item.observations}</td>
+                        <td class="observations-cell">${item.observations || ''}</td>
                         <td>
                             <button class="btn btn-primary edit-btn" data-id="${item.id}">
                                 <i class="fas fa-edit"></i> Modifier
@@ -1052,14 +1281,14 @@
                 // Ajouter les écouteurs d'événements pour les boutons d'édition et suppression
                 document.querySelectorAll('#completedTableBody .edit-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        const id = parseInt(this.getAttribute('data-id'));
+                        const id = this.getAttribute('data-id');
                         openEditModal(id);
                     });
                 });
                 
                 document.querySelectorAll('#completedTableBody .delete-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        const id = parseInt(this.getAttribute('data-id'));
+                        const id = this.getAttribute('data-id');
                         deleteAo(id);
                     });
                 });
@@ -1067,7 +1296,7 @@
                 // Ajouter les écouteurs d'événements pour les sélecteurs de statut
                 document.querySelectorAll('#completedTableBody .status-select').forEach(select => {
                     select.addEventListener('change', function() {
-                        const id = parseInt(this.getAttribute('data-id'));
+                        const id = this.getAttribute('data-id');
                         const newStatus = this.value;
                         updateStatus(id, newStatus);
                     });
@@ -1223,7 +1452,7 @@
                 document.getElementById('daoNumber').value = item.daoNumber;
                 document.getElementById('object').value = item.object;
                 document.getElementById('status').value = item.status;
-                document.getElementById('observations').value = item.observations;
+                document.getElementById('observations').value = item.observations || '';
                 aoModal.style.display = 'flex';
             }
         }
@@ -1234,7 +1463,7 @@
         }
 
         // Gestion de la soumission du formulaire
-        function handleFormSubmit(e) {
+        async function handleFormSubmit(e) {
             e.preventDefault();
             
             const id = document.getElementById('editId').value;
@@ -1244,67 +1473,70 @@
             const status = document.getElementById('status').value;
             const observations = document.getElementById('observations').value;
             
-            if (id) {
-                // Modification
-                const index = aoData.findIndex(item => item.id === parseInt(id));
-                if (index !== -1) {
-                    aoData[index] = {
-                        ...aoData[index],
+            try {
+                if (id) {
+                    // Modification
+                    await db.collection('appelsOffres').doc(id).update({
                         exercise,
                         daoNumber,
                         object,
                         status,
-                        observations
-                    };
+                        observations,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showMessage('Appel d\'offres modifié avec succès!', 'success');
+                } else {
+                    // Ajout
+                    await db.collection('appelsOffres').add({
+                        exercise,
+                        daoNumber,
+                        object,
+                        status,
+                        observations,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showMessage('Appel d\'offres ajouté avec succès!', 'success');
                 }
-            } else {
-                // Ajout
-                const newId = aoData.length > 0 ? Math.max(...aoData.map(item => item.id)) + 1 : 1;
-                aoData.push({
-                    id: newId,
-                    exercise,
-                    daoNumber,
-                    object,
-                    status,
-                    observations
-                });
+                
+                closeAoModal();
+            } catch (error) {
+                console.error('Erreur lors de l\'enregistrement:', error);
+                showMessage('Erreur lors de l\'enregistrement: ' + error.message, 'error');
             }
-            
-            sortData();
-            filteredData = [...aoData];
-            renderTable();
-            renderInprogressTable();
-            renderCompletedTable();
-            updateAlertDaoSelect();
-            closeAoModal();
         }
 
         // Mise à jour du statut
-        function updateStatus(id, newStatus) {
-            const index = aoData.findIndex(item => item.id === id);
-            if (index !== -1) {
-                aoData[index].status = newStatus;
-                filteredData = [...aoData];
-                renderTable();
-                renderInprogressTable();
-                renderCompletedTable();
+        async function updateStatus(id, newStatus) {
+            try {
+                await db.collection('appelsOffres').doc(id).update({
+                    status: newStatus,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showMessage('Statut mis à jour avec succès!', 'success');
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour du statut:', error);
+                showMessage('Erreur lors de la mise à jour du statut: ' + error.message, 'error');
             }
         }
 
         // Suppression d'un appel d'offres
-        function deleteAo(id) {
+        async function deleteAo(id) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cet appel d\'offres ?')) {
-                aoData = aoData.filter(item => item.id !== id);
-                sortData();
-                filteredData = [...aoData];
-                renderTable();
-                renderInprogressTable();
-                renderCompletedTable();
-                updateAlertDaoSelect();
-                
-                // Supprimer également les alertes associées
-                alertData = alertData.filter(alert => alert.daoId !== id);
-                renderAlerts();
+                try {
+                    await db.collection('appelsOffres').doc(id).delete();
+                    
+                    // Supprimer également les alertes associées
+                    const alertToDelete = alertData.find(alert => alert.daoId === id);
+                    if (alertToDelete) {
+                        await db.collection('alertes').doc(alertToDelete.id).delete();
+                    }
+                    
+                    showMessage('Appel d\'offres supprimé avec succès!', 'success');
+                } catch (error) {
+                    console.error('Erreur lors de la suppression:', error);
+                    showMessage('Erreur lors de la suppression: ' + error.message, 'error');
+                }
             }
         }
 
@@ -1320,35 +1552,40 @@
         }
 
         // Gestion de l'ajout d'alerte
-        function handleAlertSubmit(e) {
+        async function handleAlertSubmit(e) {
             e.preventDefault();
             
-            const daoId = parseInt(alertDaoSelect.value);
+            const daoId = alertDaoSelect.value;
             if (!daoId) {
-                alert('Veuillez sélectionner un appel d\'offres');
+                showMessage('Veuillez sélectionner un appel d\'offres', 'error');
                 return;
             }
             
             // Vérifier si l'alerte existe déjà
             if (alertData.some(alert => alert.daoId === daoId)) {
-                alert('Cet appel d\'offres est déjà dans la liste des alertes');
+                showMessage('Cet appel d\'offres est déjà dans la liste des alertes', 'error');
                 return;
             }
             
             const daoItem = aoData.find(item => item.id === daoId);
             if (daoItem) {
-                const newAlert = {
-                    id: alertData.length > 0 ? Math.max(...alertData.map(a => a.id)) + 1 : 1,
-                    daoId: daoId,
-                    daoNumber: daoItem.daoNumber,
-                    object: daoItem.object,
-                    comment: '',
-                    dateAdded: new Date().toLocaleDateString('fr-FR')
-                };
-                
-                alertData.push(newAlert);
-                renderAlerts();
-                alertForm.reset();
+                try {
+                    await db.collection('alertes').add({
+                        daoId: daoId,
+                        daoNumber: daoItem.daoNumber,
+                        object: daoItem.object,
+                        comment: '',
+                        dateAdded: new Date().toISOString(),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    alertForm.reset();
+                    showMessage('Alerte ajoutée avec succès!', 'success');
+                } catch (error) {
+                    console.error('Erreur lors de l\'ajout de l\'alerte:', error);
+                    showMessage('Erreur lors de l\'ajout de l\'alerte: ' + error.message, 'error');
+                }
             }
         }
 
@@ -1368,10 +1605,10 @@
                     <div class="alert-info">
                         <h4>${alert.daoNumber}</h4>
                         <p>${alert.object}</p>
-                        <p><small>Ajouté le: ${alert.dateAdded}</small></p>
+                        <p><small>Ajouté le: ${new Date(alert.dateAdded).toLocaleDateString('fr-FR')}</small></p>
                         <div class="form-group" style="margin-top: 10px;">
                             <label for="comment-${alert.id}">Commentaire</label>
-                            <textarea id="comment-${alert.id}" placeholder="Ajouter un commentaire..." style="width: 100%;">${alert.comment}</textarea>
+                            <textarea id="comment-${alert.id}" placeholder="Ajouter un commentaire..." style="width: 100%;">${alert.comment || ''}</textarea>
                         </div>
                     </div>
                     <div class="alert-actions">
@@ -1392,7 +1629,7 @@
             // Ajouter les écouteurs d'événements pour les boutons d'alerte
             document.querySelectorAll('.save-comment-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
+                    const id = this.getAttribute('data-id');
                     const comment = document.getElementById(`comment-${id}`).value;
                     saveAlertComment(id, comment);
                 });
@@ -1400,26 +1637,36 @@
             
             document.querySelectorAll('.delete-alert-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const id = parseInt(this.getAttribute('data-id'));
+                    const id = this.getAttribute('data-id');
                     deleteAlert(id);
                 });
             });
         }
 
         // Sauvegarder le commentaire d'une alerte
-        function saveAlertComment(id, comment) {
-            const index = alertData.findIndex(alert => alert.id === id);
-            if (index !== -1) {
-                alertData[index].comment = comment;
-                alert('Commentaire sauvegardé avec succès');
+        async function saveAlertComment(id, comment) {
+            try {
+                await db.collection('alertes').doc(id).update({
+                    comment: comment,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showMessage('Commentaire sauvegardé avec succès!', 'success');
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde du commentaire:', error);
+                showMessage('Erreur lors de la sauvegarde du commentaire: ' + error.message, 'error');
             }
         }
 
         // Supprimer une alerte
-        function deleteAlert(id) {
+        async function deleteAlert(id) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cette alerte ?')) {
-                alertData = alertData.filter(alert => alert.id !== id);
-                renderAlerts();
+                try {
+                    await db.collection('alertes').doc(id).delete();
+                    showMessage('Alerte supprimée avec succès!', 'success');
+                } catch (error) {
+                    console.error('Erreur lors de la suppression de l\'alerte:', error);
+                    showMessage('Erreur lors de la suppression de l\'alerte: ' + error.message, 'error');
+                }
             }
         }
 
@@ -1452,7 +1699,7 @@
                     item.daoNumber,
                     item.object,
                     item.status,
-                    item.observations
+                    item.observations || ''
                 ]);
             } else if (type === 'inprogress') {
                 const inprogressStatuses = [
@@ -1471,7 +1718,7 @@
                                 item.daoNumber,
                                 item.object,
                                 item.status,
-                                item.observations
+                                item.observations || ''
                             ]);
             } else if (type === 'completed') {
                 const completedStatuses = [
@@ -1491,7 +1738,7 @@
                                 item.daoNumber,
                                 item.object,
                                 item.status,
-                                item.observations
+                                item.observations || ''
                             ]);
             }
             
@@ -1525,7 +1772,7 @@
                     'DAO N°': item.daoNumber,
                     'Objet': item.object,
                     'État d\'Avancement': item.status,
-                    'Observations': item.observations
+                    'Observations': item.observations || ''
                 }));
             } else if (type === 'inprogress') {
                 const inprogressStatuses = [
@@ -1544,7 +1791,7 @@
                                 'DAO N°': item.daoNumber,
                                 'Objet': item.object,
                                 'État d\'Avancement': item.status,
-                                'Observations': item.observations
+                                'Observations': item.observations || ''
                             }));
             } else if (type === 'completed') {
                 const completedStatuses = [
@@ -1564,7 +1811,7 @@
                                 'DAO N°': item.daoNumber,
                                 'Objet': item.object,
                                 'État d\'Avancement': item.status,
-                                'Observations': item.observations
+                                'Observations': item.observations || ''
                             }));
             }
             
