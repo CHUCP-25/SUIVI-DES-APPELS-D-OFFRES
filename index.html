@@ -19,6 +19,10 @@
             --danger-color: #e74c3c;
             --pdf-color: #e74c3c;
             --excel-color: #2ecc71;
+            --overview-color: #3498db;
+            --inprogress-color: #f39c12;
+            --completed-color: #2ecc71;
+            --alert-color: #e74c3c;
             --border-radius: 6px;
             --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
@@ -63,6 +67,48 @@
             font-weight: 600;
         }
 
+        .tabs-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .tab-overview {
+            background-color: var(--overview-color);
+        }
+
+        .tab-inprogress {
+            background-color: var(--inprogress-color);
+        }
+
+        .tab-completed {
+            background-color: var(--completed-color);
+        }
+
+        .tab-alerts {
+            background-color: var(--alert-color);
+        }
+
+        .tab-btn.active {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
         .search-section {
             background-color: white;
             padding: 20px;
@@ -75,10 +121,12 @@
             display: flex;
             gap: 15px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .form-group {
             flex: 1;
+            min-width: 200px;
         }
 
         label {
@@ -88,7 +136,7 @@
             color: var(--dark-color);
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 10px 15px;
             border: 1px solid #ddd;
@@ -97,7 +145,7 @@
             transition: var(--transition);
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
@@ -313,6 +361,49 @@
             margin-bottom: 15px;
         }
 
+        .alert-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 20px;
+        }
+
+        .alert-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .alert-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+
+        .alert-info {
+            flex: 1;
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -340,6 +431,17 @@
                 flex-direction: column;
                 gap: 15px;
             }
+            
+            .alert-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .alert-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
         }
     </style>
 </head>
@@ -358,52 +460,216 @@
     </header>
 
     <div class="container">
-        <section class="search-section">
-            <form class="search-form" id="searchForm">
-                <div class="form-group">
-                    <label for="searchGlobal">Rechercher</label>
-                    <input type="text" id="searchGlobal" placeholder="Rechercher par DAO N°, Objet ou Exercice">
+        <section class="tabs-section">
+            <button class="tab-btn tab-overview active" data-tab="overview">
+                <i class="fas fa-chart-bar"></i> Vue d'ensemble
+            </button>
+            <button class="tab-btn tab-inprogress" data-tab="inprogress">
+                <i class="fas fa-tasks"></i> Ouverture en cours
+            </button>
+            <button class="tab-btn tab-completed" data-tab="completed">
+                <i class="fas fa-check-circle"></i> DAO achevés
+            </button>
+            <button class="tab-btn tab-alerts" data-tab="alerts">
+                <i class="fas fa-bell"></i> Alertes
+            </button>
+        </section>
+
+        <!-- Vue d'ensemble -->
+        <div class="tab-content active" id="overview-content">
+            <section class="search-section">
+                <form class="search-form" id="searchForm">
+                    <div class="form-group">
+                        <label for="searchGlobal">Rechercher</label>
+                        <input type="text" id="searchGlobal" placeholder="Rechercher par DAO N°, Objet ou Exercice">
+                    </div>
+                    <div class="form-group">
+                        <label for="searchStatus">État d'avancement</label>
+                        <select id="searchStatus">
+                            <option value="">Tous les états</option>
+                            <option value="en cours d'élaboration">En cours d'élaboration</option>
+                            <option value="déposé pour signature du Directeur">Déposé pour signature du Directeur</option>
+                            <option value="envoyé aux membres de la commission">Envoyé aux membres de la commission</option>
+                            <option value="appel d'offres publié">Appel d'offres publié</option>
+                            <option value="examen des dossier administratifs et technique">Examen des dossier administratifs et technique</option>
+                            <option value="examen de la documentation technique">Examen de la documentation technique</option>
+                            <option value="examen des offres techniques">Examen des offres techniques</option>
+                            <option value="examen des offres financières">Examen des offres financières</option>
+                            <option value="demande de complément envoyée">Demande de complément envoyée</option>
+                            <option value="complément de dossier reçu à examiner">Complément de dossier reçu à examiner</option>
+                            <option value="complément de dossier encours d'examination">Complément de dossier encours d'examination</option>
+                            <option value="échantillons envoyées à la sous commission">Échantillons envoyées à la sous commission</option>
+                            <option value="Résultat & Extrait de PV publiés">Résultat & Extrait de PV publiés</option>
+                            <option value="marché en cours d'élaboration">Marché en cours d'élaboration</option>
+                            <option value="marché envoyé à la société pour signature">Marché envoyé à la société pour signature</option>
+                            <option value="marché envoyé pour signature de la partie technique">Marché envoyé pour signature de la partie technique</option>
+                            <option value="marché déposé pour signature du directeur">Marché déposé pour signature du directeur</option>
+                            <option value="marché envoyé au Contrôleur d'Etat pour visa">Marché envoyé au Contrôleur d'Etat pour visa</option>
+                            <option value="marché visé reçu">Marché visé reçu</option>
+                            <option value="marché approuvé notifié à la société">Marché approuvé notifié à la société</option>
+                            <option value="ordre de service de commencement à notifier">Ordre de service de commencement à notifier</option>
+                            <option value="marché envoyé au service utilisateur">Marché envoyé au service utilisateur</option>
+                        </select>
+                    </div>
+                </form>
+            </section>
+
+            <section class="actions-section">
+                <div class="export-buttons">
+                    <button class="btn btn-pdf" id="printPdfBtn">
+                        <i class="fas fa-file-pdf"></i> Imprimer PDF
+                    </button>
+                    <button class="btn btn-excel" id="printExcelBtn">
+                        <i class="fas fa-file-excel"></i> Exporter Excel
+                    </button>
                 </div>
-            </form>
-        </section>
+                <div class="pagination-controls" id="paginationControls">
+                    <!-- Les contrôles de pagination seront générés ici -->
+                </div>
+            </section>
 
-        <section class="actions-section">
-            <div class="export-buttons">
-                <button class="btn btn-pdf" id="printPdfBtn">
-                    <i class="fas fa-file-pdf"></i> Imprimer PDF
-                </button>
-                <button class="btn btn-excel" id="printExcelBtn">
-                    <i class="fas fa-file-excel"></i> Exporter Excel
-                </button>
-            </div>
-            <div class="pagination-controls" id="paginationControls">
-                <!-- Les contrôles de pagination seront générés ici -->
-            </div>
-        </section>
+            <section class="table-container">
+                <table id="aoTable">
+                    <thead>
+                        <tr>
+                            <th>Exercice</th>
+                            <th>DAO N°</th>
+                            <th>Objet</th>
+                            <th>État d'Avancement</th>
+                            <th>Observations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Les données seront insérées ici dynamiquement -->
+                    </tbody>
+                </table>
+            </section>
 
-        <section class="table-container">
-            <table id="aoTable">
-                <thead>
-                    <tr>
-                        <th>Exercice</th>
-                        <th>DAO N°</th>
-                        <th>Objet</th>
-                        <th>État d'Avancement</th>
-                        <th>Observations</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- Les données seront insérées ici dynamiquement -->
-                </tbody>
-            </table>
-        </section>
+            <section class="pagination">
+                <div class="pagination-info" id="paginationInfo">
+                    Affichage de 1 à 25 sur 0 entrées
+                </div>
+            </section>
+        </div>
 
-        <section class="pagination">
-            <div class="pagination-info" id="paginationInfo">
-                Affichage de 1 à 25 sur 0 entrées
-            </div>
-        </section>
+        <!-- Ouverture en cours -->
+        <div class="tab-content" id="inprogress-content">
+            <section class="search-section">
+                <h3>Appels d'offres en cours d'ouverture</h3>
+                <p>Cette section affiche les appels d'offres en phase d'examen et d'évaluation.</p>
+            </section>
+
+            <section class="actions-section">
+                <div class="export-buttons">
+                    <button class="btn btn-pdf" id="printPdfInprogressBtn">
+                        <i class="fas fa-file-pdf"></i> Imprimer PDF
+                    </button>
+                    <button class="btn btn-excel" id="printExcelInprogressBtn">
+                        <i class="fas fa-file-excel"></i> Exporter Excel
+                    </button>
+                </div>
+                <div class="pagination-controls" id="paginationInprogressControls">
+                    <!-- Les contrôles de pagination seront générés ici -->
+                </div>
+            </section>
+
+            <section class="table-container">
+                <table id="inprogressTable">
+                    <thead>
+                        <tr>
+                            <th>Exercice</th>
+                            <th>DAO N°</th>
+                            <th>Objet</th>
+                            <th>État d'Avancement</th>
+                            <th>Observations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inprogressTableBody">
+                        <!-- Les données seront insérées ici dynamiquement -->
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="pagination">
+                <div class="pagination-info" id="paginationInprogressInfo">
+                    Affichage de 1 à 25 sur 0 entrées
+                </div>
+            </section>
+        </div>
+
+        <!-- DAO achevés -->
+        <div class="tab-content" id="completed-content">
+            <section class="search-section">
+                <h3>Appels d'offres achevés</h3>
+                <p>Cette section affiche les appels d'offres dont le processus est terminé et le marché est en cours.</p>
+            </section>
+
+            <section class="actions-section">
+                <div class="export-buttons">
+                    <button class="btn btn-pdf" id="printPdfCompletedBtn">
+                        <i class="fas fa-file-pdf"></i> Imprimer PDF
+                    </button>
+                    <button class="btn btn-excel" id="printExcelCompletedBtn">
+                        <i class="fas fa-file-excel"></i> Exporter Excel
+                    </button>
+                </div>
+                <div class="pagination-controls" id="paginationCompletedControls">
+                    <!-- Les contrôles de pagination seront générés ici -->
+                </div>
+            </section>
+
+            <section class="table-container">
+                <table id="completedTable">
+                    <thead>
+                        <tr>
+                            <th>Exercice</th>
+                            <th>DAO N°</th>
+                            <th>Objet</th>
+                            <th>État d'Avancement</th>
+                            <th>Observations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="completedTableBody">
+                        <!-- Les données seront insérées ici dynamiquement -->
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="pagination">
+                <div class="pagination-info" id="paginationCompletedInfo">
+                    Affichage de 1 à 25 sur 0 entrées
+                </div>
+            </section>
+        </div>
+
+        <!-- Alertes -->
+        <div class="tab-content" id="alerts-content">
+            <section class="alert-section">
+                <h3>Gestion des Alertes</h3>
+                <p>Ajoutez des appels d'offres nécessitant une attention particulière.</p>
+                
+                <form class="alert-form" id="alertForm">
+                    <div class="form-group">
+                        <label for="alertDaoSelect">Sélectionner un appel d'offres</label>
+                        <select id="alertDaoSelect">
+                            <option value="">Choisir un appel d'offres</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="align-self: flex-end;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Ajouter à la liste d'alertes
+                        </button>
+                    </div>
+                </form>
+
+                <div id="alertsList">
+                    <!-- Les alertes seront affichées ici -->
+                </div>
+            </section>
+        </div>
     </div>
 
     <!-- Modal pour ajouter/modifier un appel d'offres -->
@@ -476,19 +742,34 @@
             { id: 4, daoNumber: 'DAO-2024-001', object: 'Acquisition de véhicules', status: 'marché en cours d\'élaboration', observations: '', exercise: '2024' },
             { id: 5, daoNumber: 'DAO-2024-002', object: 'Services de nettoyage pour les locaux administratifs', status: 'envoyé aux membres de la commission', observations: 'En attente de retour des membres', exercise: '2024' },
             { id: 6, daoNumber: 'DAO-2023-004', object: 'Étude technique pour le projet d\'infrastructure', status: 'examen des offres financières', observations: 'Analyse en cours par le comité', exercise: '2023' },
+            { id: 7, daoNumber: 'DAO-2024-003', object: 'Fourniture de mobilier de bureau', status: 'marché envoyé à la société pour signature', observations: 'Signature en attente', exercise: '2024' },
+            { id: 8, daoNumber: 'DAO-2023-005', object: 'Prestation de services juridiques', status: 'examen des dossier administratifs et technique', observations: 'Dossiers en cours d\'examen', exercise: '2023' },
         ];
+
+        // Données pour les alertes
+        let alertData = [];
 
         // Variables globales
         let currentPage = 1;
+        let currentInprogressPage = 1;
+        let currentCompletedPage = 1;
         const rowsPerPage = 25;
         let filteredData = [...aoData];
+        let currentTab = 'overview';
 
         // Éléments DOM
         const tableBody = document.getElementById('tableBody');
+        const inprogressTableBody = document.getElementById('inprogressTableBody');
+        const completedTableBody = document.getElementById('completedTableBody');
         const paginationInfo = document.getElementById('paginationInfo');
+        const paginationInprogressInfo = document.getElementById('paginationInprogressInfo');
+        const paginationCompletedInfo = document.getElementById('paginationCompletedInfo');
         const paginationControls = document.getElementById('paginationControls');
+        const paginationInprogressControls = document.getElementById('paginationInprogressControls');
+        const paginationCompletedControls = document.getElementById('paginationCompletedControls');
         const searchForm = document.getElementById('searchForm');
         const searchGlobal = document.getElementById('searchGlobal');
+        const searchStatus = document.getElementById('searchStatus');
         const aoModal = document.getElementById('aoModal');
         const aoForm = document.getElementById('aoForm');
         const modalTitle = document.getElementById('modalTitle');
@@ -497,23 +778,50 @@
         const cancelBtn = document.getElementById('cancelBtn');
         const printPdfBtn = document.getElementById('printPdfBtn');
         const printExcelBtn = document.getElementById('printExcelBtn');
+        const printPdfInprogressBtn = document.getElementById('printPdfInprogressBtn');
+        const printExcelInprogressBtn = document.getElementById('printExcelInprogressBtn');
+        const printPdfCompletedBtn = document.getElementById('printPdfCompletedBtn');
+        const printExcelCompletedBtn = document.getElementById('printExcelCompletedBtn');
+        const alertForm = document.getElementById('alertForm');
+        const alertDaoSelect = document.getElementById('alertDaoSelect');
+        const alertsList = document.getElementById('alertsList');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
 
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             sortData();
             renderTable();
+            renderInprogressTable();
+            renderCompletedTable();
+            updateAlertDaoSelect();
+            renderAlerts();
             setupEventListeners();
         });
 
         // Configuration des écouteurs d'événements
         function setupEventListeners() {
             searchGlobal.addEventListener('input', handleSearch);
+            searchStatus.addEventListener('change', handleSearch);
             addBtn.addEventListener('click', openAddModal);
             closeModal.addEventListener('click', closeAoModal);
             cancelBtn.addEventListener('click', closeAoModal);
             aoForm.addEventListener('submit', handleFormSubmit);
-            printPdfBtn.addEventListener('click', printPdf);
-            printExcelBtn.addEventListener('click', exportToExcel);
+            printPdfBtn.addEventListener('click', () => printPdf('overview'));
+            printExcelBtn.addEventListener('click', () => exportToExcel('overview'));
+            printPdfInprogressBtn.addEventListener('click', () => printPdf('inprogress'));
+            printExcelInprogressBtn.addEventListener('click', () => exportToExcel('inprogress'));
+            printPdfCompletedBtn.addEventListener('click', () => printPdf('completed'));
+            printExcelCompletedBtn.addEventListener('click', () => exportToExcel('completed'));
+            alertForm.addEventListener('submit', handleAlertSubmit);
+            
+            // Gestion des onglets
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
             
             // Fermer la modal en cliquant en dehors
             window.addEventListener('click', function(event) {
@@ -521,6 +829,23 @@
                     closeAoModal();
                 }
             });
+        }
+
+        // Changer d'onglet
+        function switchTab(tabId) {
+            // Désactiver tous les onglets
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Activer l'onglet sélectionné
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(`${tabId}-content`).classList.add('active');
+            
+            currentTab = tabId;
         }
 
         // Trier les données par exercice (croissant) et DAO N° (décroissant)
@@ -536,7 +861,7 @@
             filteredData = [...aoData];
         }
 
-        // Rendu du tableau
+        // Rendu du tableau (Vue d'ensemble)
         function renderTable() {
             tableBody.innerHTML = '';
             
@@ -596,7 +921,160 @@
                 });
             }
             
-            updatePagination();
+            updatePagination(currentPage, filteredData.length, paginationInfo, paginationControls, renderTable);
+        }
+
+        // Rendu du tableau (Ouverture en cours)
+        function renderInprogressTable() {
+            inprogressTableBody.innerHTML = '';
+            
+            // États d'avancement pour "Ouverture en cours"
+            const inprogressStatuses = [
+                "examen des dossier administratifs et technique",
+                "examen de la documentation technique",
+                "examen des offres techniques",
+                "examen des offres financières",
+                "demande de complément envoyée",
+                "complément de dossier reçu à examiner",
+                "complément de dossier encours d'examination",
+                "échantillons envoyées à la sous commission"
+            ];
+            
+            const inprogressData = aoData.filter(item => inprogressStatuses.includes(item.status));
+            const startIndex = (currentInprogressPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const pageData = inprogressData.slice(startIndex, endIndex);
+            
+            if (pageData.length === 0) {
+                inprogressTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucun appel d\'offres en cours d\'ouverture</td></tr>';
+            } else {
+                pageData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.exercise}</td>
+                        <td>${item.daoNumber}</td>
+                        <td class="object-cell">${item.object}</td>
+                        <td>
+                            <select class="status-select" data-id="${item.id}">
+                                ${generateStatusOptions(item.status)}
+                            </select>
+                        </td>
+                        <td class="observations-cell">${item.observations}</td>
+                        <td>
+                            <button class="btn btn-primary edit-btn" data-id="${item.id}">
+                                <i class="fas fa-edit"></i> Modifier
+                            </button>
+                            <button class="btn btn-danger delete-btn" data-id="${item.id}">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </td>
+                    `;
+                    inprogressTableBody.appendChild(row);
+                });
+                
+                // Ajouter les écouteurs d'événements pour les boutons d'édition et suppression
+                document.querySelectorAll('#inprogressTableBody .edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        openEditModal(id);
+                    });
+                });
+                
+                document.querySelectorAll('#inprogressTableBody .delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        deleteAo(id);
+                    });
+                });
+                
+                // Ajouter les écouteurs d'événements pour les sélecteurs de statut
+                document.querySelectorAll('#inprogressTableBody .status-select').forEach(select => {
+                    select.addEventListener('change', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        const newStatus = this.value;
+                        updateStatus(id, newStatus);
+                    });
+                });
+            }
+            
+            updatePagination(currentInprogressPage, inprogressData.length, paginationInprogressInfo, paginationInprogressControls, renderInprogressTable, 'inprogress');
+        }
+
+        // Rendu du tableau (DAO achevés)
+        function renderCompletedTable() {
+            completedTableBody.innerHTML = '';
+            
+            // États d'avancement pour "DAO achevés"
+            const completedStatuses = [
+                "marché en cours d'élaboration",
+                "marché envoyé à la société pour signature",
+                "marché envoyé pour signature de la partie technique",
+                "marché déposé pour signature du directeur",
+                "marché envoyé au Contrôleur d'Etat pour visa",
+                "marché visé reçu",
+                "marché approuvé notifié à la société",
+                "ordre de service de commencement à notifier",
+                "marché envoyé au service utilisateur"
+            ];
+            
+            const completedData = aoData.filter(item => completedStatuses.includes(item.status));
+            const startIndex = (currentCompletedPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const pageData = completedData.slice(startIndex, endIndex);
+            
+            if (pageData.length === 0) {
+                completedTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucun appel d\'offres achevé</td></tr>';
+            } else {
+                pageData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.exercise}</td>
+                        <td>${item.daoNumber}</td>
+                        <td class="object-cell">${item.object}</td>
+                        <td>
+                            <select class="status-select" data-id="${item.id}">
+                                ${generateStatusOptions(item.status)}
+                            </select>
+                        </td>
+                        <td class="observations-cell">${item.observations}</td>
+                        <td>
+                            <button class="btn btn-primary edit-btn" data-id="${item.id}">
+                                <i class="fas fa-edit"></i> Modifier
+                            </button>
+                            <button class="btn btn-danger delete-btn" data-id="${item.id}">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </td>
+                    `;
+                    completedTableBody.appendChild(row);
+                });
+                
+                // Ajouter les écouteurs d'événements pour les boutons d'édition et suppression
+                document.querySelectorAll('#completedTableBody .edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        openEditModal(id);
+                    });
+                });
+                
+                document.querySelectorAll('#completedTableBody .delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        deleteAo(id);
+                    });
+                });
+                
+                // Ajouter les écouteurs d'événements pour les sélecteurs de statut
+                document.querySelectorAll('#completedTableBody .status-select').forEach(select => {
+                    select.addEventListener('change', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        const newStatus = this.value;
+                        updateStatus(id, newStatus);
+                    });
+                });
+            }
+            
+            updatePagination(currentCompletedPage, completedData.length, paginationCompletedInfo, paginationCompletedControls, renderCompletedTable, 'completed');
         }
 
         // Générer les options de statut
@@ -632,33 +1110,39 @@
         }
 
         // Mise à jour de la pagination
-        function updatePagination() {
-            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        function updatePagination(page, totalItems, infoElement, controlsElement, renderFunction, type = 'overview') {
+            const totalPages = Math.ceil(totalItems / rowsPerPage);
             
             // Mise à jour des informations
-            const startIndex = (currentPage - 1) * rowsPerPage + 1;
-            const endIndex = Math.min(currentPage * rowsPerPage, filteredData.length);
-            paginationInfo.textContent = `Affichage de ${startIndex} à ${endIndex} sur ${filteredData.length} entrées`;
+            const startIndex = (page - 1) * rowsPerPage + 1;
+            const endIndex = Math.min(page * rowsPerPage, totalItems);
+            infoElement.textContent = `Affichage de ${startIndex} à ${endIndex} sur ${totalItems} entrées`;
             
             // Mise à jour des contrôles
-            paginationControls.innerHTML = '';
+            controlsElement.innerHTML = '';
             
             // Bouton précédent
             const prevBtn = document.createElement('button');
             prevBtn.className = 'page-btn';
             prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
-            prevBtn.disabled = currentPage === 1;
+            prevBtn.disabled = page === 1;
             prevBtn.addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderTable();
+                if (page > 1) {
+                    if (type === 'inprogress') {
+                        currentInprogressPage--;
+                    } else if (type === 'completed') {
+                        currentCompletedPage--;
+                    } else {
+                        currentPage--;
+                    }
+                    renderFunction();
                 }
             });
-            paginationControls.appendChild(prevBtn);
+            controlsElement.appendChild(prevBtn);
             
             // Pages
             const maxVisiblePages = 5;
-            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
             let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
             
             if (endPage - startPage + 1 < maxVisiblePages) {
@@ -667,39 +1151,54 @@
             
             for (let i = startPage; i <= endPage; i++) {
                 const pageBtn = document.createElement('button');
-                pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.className = `page-btn ${i === page ? 'active' : ''}`;
                 pageBtn.textContent = i;
                 pageBtn.addEventListener('click', () => {
-                    currentPage = i;
-                    renderTable();
+                    if (type === 'inprogress') {
+                        currentInprogressPage = i;
+                    } else if (type === 'completed') {
+                        currentCompletedPage = i;
+                    } else {
+                        currentPage = i;
+                    }
+                    renderFunction();
                 });
-                paginationControls.appendChild(pageBtn);
+                controlsElement.appendChild(pageBtn);
             }
             
             // Bouton suivant
             const nextBtn = document.createElement('button');
             nextBtn.className = 'page-btn';
             nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
-            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.disabled = page === totalPages;
             nextBtn.addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderTable();
+                if (page < totalPages) {
+                    if (type === 'inprogress') {
+                        currentInprogressPage++;
+                    } else if (type === 'completed') {
+                        currentCompletedPage++;
+                    } else {
+                        currentPage++;
+                    }
+                    renderFunction();
                 }
             });
-            paginationControls.appendChild(nextBtn);
+            controlsElement.appendChild(nextBtn);
         }
 
         // Gestion de la recherche
         function handleSearch() {
             const searchTerm = searchGlobal.value.toLowerCase();
+            const statusFilter = searchStatus.value;
             
             filteredData = aoData.filter(item => {
-                const matchesDao = item.daoNumber.toLowerCase().includes(searchTerm);
-                const matchesObject = item.object.toLowerCase().includes(searchTerm);
-                const matchesExercise = item.exercise.toLowerCase().includes(searchTerm);
+                const matchesSearch = item.daoNumber.toLowerCase().includes(searchTerm) || 
+                                     item.object.toLowerCase().includes(searchTerm) || 
+                                     item.exercise.toLowerCase().includes(searchTerm);
                 
-                return matchesDao || matchesObject || matchesExercise;
+                const matchesStatus = statusFilter === '' || item.status === statusFilter;
+                
+                return matchesSearch && matchesStatus;
             });
             
             currentPage = 1;
@@ -774,6 +1273,9 @@
             sortData();
             filteredData = [...aoData];
             renderTable();
+            renderInprogressTable();
+            renderCompletedTable();
+            updateAlertDaoSelect();
             closeAoModal();
         }
 
@@ -783,6 +1285,9 @@
             if (index !== -1) {
                 aoData[index].status = newStatus;
                 filteredData = [...aoData];
+                renderTable();
+                renderInprogressTable();
+                renderCompletedTable();
             }
         }
 
@@ -793,17 +1298,142 @@
                 sortData();
                 filteredData = [...aoData];
                 renderTable();
+                renderInprogressTable();
+                renderCompletedTable();
+                updateAlertDaoSelect();
+                
+                // Supprimer également les alertes associées
+                alertData = alertData.filter(alert => alert.daoId !== id);
+                renderAlerts();
+            }
+        }
+
+        // Mettre à jour la liste déroulante des DAO pour les alertes
+        function updateAlertDaoSelect() {
+            alertDaoSelect.innerHTML = '<option value="">Choisir un appel d\'offres</option>';
+            aoData.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.daoNumber} - ${item.object}`;
+                alertDaoSelect.appendChild(option);
+            });
+        }
+
+        // Gestion de l'ajout d'alerte
+        function handleAlertSubmit(e) {
+            e.preventDefault();
+            
+            const daoId = parseInt(alertDaoSelect.value);
+            if (!daoId) {
+                alert('Veuillez sélectionner un appel d\'offres');
+                return;
+            }
+            
+            // Vérifier si l'alerte existe déjà
+            if (alertData.some(alert => alert.daoId === daoId)) {
+                alert('Cet appel d\'offres est déjà dans la liste des alertes');
+                return;
+            }
+            
+            const daoItem = aoData.find(item => item.id === daoId);
+            if (daoItem) {
+                const newAlert = {
+                    id: alertData.length > 0 ? Math.max(...alertData.map(a => a.id)) + 1 : 1,
+                    daoId: daoId,
+                    daoNumber: daoItem.daoNumber,
+                    object: daoItem.object,
+                    comment: '',
+                    dateAdded: new Date().toLocaleDateString('fr-FR')
+                };
+                
+                alertData.push(newAlert);
+                renderAlerts();
+                alertForm.reset();
+            }
+        }
+
+        // Rendu des alertes
+        function renderAlerts() {
+            alertsList.innerHTML = '';
+            
+            if (alertData.length === 0) {
+                alertsList.innerHTML = '<p style="text-align: center; padding: 20px;">Aucune alerte définie</p>';
+                return;
+            }
+            
+            alertData.forEach(alert => {
+                const alertElement = document.createElement('div');
+                alertElement.className = 'alert-item';
+                alertElement.innerHTML = `
+                    <div class="alert-info">
+                        <h4>${alert.daoNumber}</h4>
+                        <p>${alert.object}</p>
+                        <p><small>Ajouté le: ${alert.dateAdded}</small></p>
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label for="comment-${alert.id}">Commentaire</label>
+                            <textarea id="comment-${alert.id}" placeholder="Ajouter un commentaire..." style="width: 100%;">${alert.comment}</textarea>
+                        </div>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn btn-success save-comment-btn" data-id="${alert.id}">
+                            <i class="fas fa-save"></i> Valider
+                        </button>
+                        <button class="btn btn-primary edit-comment-btn" data-id="${alert.id}">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        <button class="btn btn-danger delete-alert-btn" data-id="${alert.id}">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </div>
+                `;
+                alertsList.appendChild(alertElement);
+            });
+            
+            // Ajouter les écouteurs d'événements pour les boutons d'alerte
+            document.querySelectorAll('.save-comment-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const comment = document.getElementById(`comment-${id}`).value;
+                    saveAlertComment(id, comment);
+                });
+            });
+            
+            document.querySelectorAll('.delete-alert-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    deleteAlert(id);
+                });
+            });
+        }
+
+        // Sauvegarder le commentaire d'une alerte
+        function saveAlertComment(id, comment) {
+            const index = alertData.findIndex(alert => alert.id === id);
+            if (index !== -1) {
+                alertData[index].comment = comment;
+                alert('Commentaire sauvegardé avec succès');
+            }
+        }
+
+        // Supprimer une alerte
+        function deleteAlert(id) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette alerte ?')) {
+                alertData = alertData.filter(alert => alert.id !== id);
+                renderAlerts();
             }
         }
 
         // Impression PDF
-        function printPdf() {
+        function printPdf(type) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
             // Titre du document
             doc.setFontSize(16);
-            doc.text('Suivi des Appels d\'Offres', 14, 15);
+            let title = 'Suivi des Appels d\'Offres';
+            if (type === 'inprogress') title = 'Appels d\'Offres en Cours d\'Ouverture';
+            if (type === 'completed') title = 'Appels d\'Offres Achevés';
+            doc.text(title, 14, 15);
             
             // Date de génération
             const today = new Date();
@@ -815,13 +1445,55 @@
             const headers = [['Exercice', 'DAO N°', 'Objet', 'État d\'Avancement', 'Observations']];
             
             // Données du tableau
-            const data = filteredData.map(item => [
-                item.exercise,
-                item.daoNumber,
-                item.object,
-                item.status,
-                item.observations
-            ]);
+            let data = [];
+            if (type === 'overview') {
+                data = filteredData.map(item => [
+                    item.exercise,
+                    item.daoNumber,
+                    item.object,
+                    item.status,
+                    item.observations
+                ]);
+            } else if (type === 'inprogress') {
+                const inprogressStatuses = [
+                    "examen des dossier administratifs et technique",
+                    "examen de la documentation technique",
+                    "examen des offres techniques",
+                    "examen des offres financières",
+                    "demande de complément envoyée",
+                    "complément de dossier reçu à examiner",
+                    "complément de dossier encours d'examination",
+                    "échantillons envoyées à la sous commission"
+                ];
+                data = aoData.filter(item => inprogressStatuses.includes(item.status))
+                            .map(item => [
+                                item.exercise,
+                                item.daoNumber,
+                                item.object,
+                                item.status,
+                                item.observations
+                            ]);
+            } else if (type === 'completed') {
+                const completedStatuses = [
+                    "marché en cours d'élaboration",
+                    "marché envoyé à la société pour signature",
+                    "marché envoyé pour signature de la partie technique",
+                    "marché déposé pour signature du directeur",
+                    "marché envoyé au Contrôleur d'Etat pour visa",
+                    "marché visé reçu",
+                    "marché approuvé notifié à la société",
+                    "ordre de service de commencement à notifier",
+                    "marché envoyé au service utilisateur"
+                ];
+                data = aoData.filter(item => completedStatuses.includes(item.status))
+                            .map(item => [
+                                item.exercise,
+                                item.daoNumber,
+                                item.object,
+                                item.status,
+                                item.observations
+                            ]);
+            }
             
             // Générer le tableau
             doc.autoTable({
@@ -840,29 +1512,75 @@
             });
             
             // Télécharger le PDF
-            doc.save('suivi_appels_offres.pdf');
+            doc.save(`suivi_appels_offres_${type}.pdf`);
         }
 
         // Export Excel
-        function exportToExcel() {
+        function exportToExcel(type) {
             // Préparer les données
-            const data = filteredData.map(item => ({
-                'Exercice': item.exercise,
-                'DAO N°': item.daoNumber,
-                'Objet': item.object,
-                'État d\'Avancement': item.status,
-                'Observations': item.observations
-            }));
+            let data = [];
+            if (type === 'overview') {
+                data = filteredData.map(item => ({
+                    'Exercice': item.exercise,
+                    'DAO N°': item.daoNumber,
+                    'Objet': item.object,
+                    'État d\'Avancement': item.status,
+                    'Observations': item.observations
+                }));
+            } else if (type === 'inprogress') {
+                const inprogressStatuses = [
+                    "examen des dossier administratifs et technique",
+                    "examen de la documentation technique",
+                    "examen des offres techniques",
+                    "examen des offres financières",
+                    "demande de complément envoyée",
+                    "complément de dossier reçu à examiner",
+                    "complément de dossier encours d'examination",
+                    "échantillons envoyées à la sous commission"
+                ];
+                data = aoData.filter(item => inprogressStatuses.includes(item.status))
+                            .map(item => ({
+                                'Exercice': item.exercise,
+                                'DAO N°': item.daoNumber,
+                                'Objet': item.object,
+                                'État d\'Avancement': item.status,
+                                'Observations': item.observations
+                            }));
+            } else if (type === 'completed') {
+                const completedStatuses = [
+                    "marché en cours d'élaboration",
+                    "marché envoyé à la société pour signature",
+                    "marché envoyé pour signature de la partie technique",
+                    "marché déposé pour signature du directeur",
+                    "marché envoyé au Contrôleur d'Etat pour visa",
+                    "marché visé reçu",
+                    "marché approuvé notifié à la société",
+                    "ordre de service de commencement à notifier",
+                    "marché envoyé au service utilisateur"
+                ];
+                data = aoData.filter(item => completedStatuses.includes(item.status))
+                            .map(item => ({
+                                'Exercice': item.exercise,
+                                'DAO N°': item.daoNumber,
+                                'Objet': item.object,
+                                'État d\'Avancement': item.status,
+                                'Observations': item.observations
+                            }));
+            }
             
             // Créer un classeur
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet(data);
             
             // Ajouter la feuille au classeur
-            XLSX.utils.book_append_sheet(wb, ws, 'Appels d\'Offres');
+            let sheetName = 'Appels d\'Offres';
+            if (type === 'inprogress') sheetName = 'Ouverture en cours';
+            if (type === 'completed') sheetName = 'DAO achevés';
+            
+            XLSX.utils.book_append_sheet(wb, ws, sheetName);
             
             // Générer le fichier Excel et le télécharger
-            XLSX.writeFile(wb, 'suivi_appels_offres.xlsx');
+            XLSX.writeFile(wb, `suivi_appels_offres_${type}.xlsx`);
         }
     </script>
     
