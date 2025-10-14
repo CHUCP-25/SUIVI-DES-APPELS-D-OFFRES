@@ -186,7 +186,7 @@
         }
 
         .btn {
-            padding: 8px 16px;
+            padding: 8px;
             border: none;
             border-radius: var(--border-radius);
             cursor: pointer;
@@ -195,7 +195,9 @@
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
         }
 
         .btn:hover {
@@ -268,10 +270,12 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11px;
         }
 
         thead {
-            background-color: var(--primary-color);
+            background-color: #000080; /* Bleu marine */
             color: white;
         }
 
@@ -283,10 +287,10 @@
         }
 
         th {
-    font-weight: 600;
-    background-color: var(--primary-color);
-    color: white;
-}
+            font-weight: 600;
+            background-color: #000080; /* Bleu marine */
+            color: white;
+        }
 
         tbody tr {
             transition: var(--transition);
@@ -302,6 +306,14 @@
             max-width: 300px;
             word-wrap: break-word;
             text-align: justify;
+        }
+
+        .status-cell {
+            width: 350px;
+            max-width: 350px;
+            word-wrap: break-word;
+            text-align: justify;
+            line-height: 1.4;
         }
 
         .observations-cell {
@@ -491,6 +503,27 @@
             color: #363;
         }
 
+        .alert-comment {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Animation de clignotement pour la fenêtre modale */
+        @keyframes gradientBlink {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        .modal-content {
+            animation: modalFadeIn 0.3s ease-out, gradientBlink 2s 3;
+        }
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
@@ -538,10 +571,10 @@
             <div class="header-content">
                 <h1>Suivi des Appels d'Offres</h1>
                 <div>
-                    <button class="btn btn-primary" id="addBtn">
-                        <i class="fas fa-plus"></i> Nouvel Appel d'Offres
-                    </button>
-                </div>
+    <button class="btn btn-primary" id="addBtn" title="Nouvel Appel d'Offres">
+        <i class="fas fa-plus"></i> Nouvel Appel d'Offres
+    </button>
+</div>
             </div>
         </div>
     </header>
@@ -587,7 +620,7 @@
                             <option value="demande de complément envoyée">Demande de complément envoyée</option>
                             <option value="complément de dossier reçu à examiner">Complément de dossier reçu à examiner</option>
                             <option value="complément de dossier encours d'examination">Complément de dossier encours d'examination</option>
-                            <option value="échantillons envoyées à la sous commission">Échantillons envoyées à la sous commission</option>
+                            <option value="échantillons envoyés à la sous commission">Échantillons envoyés à la sous commission</option>
                             <option value="Résultat & Extrait de PV publiés">Résultat & Extrait de PV publiés</option>
                             <option value="marché en cours d'élaboration">Marché en cours d'élaboration</option>
                             <option value="marché envoyé à la société pour signature">Marché envoyé à la société pour signature</option>
@@ -605,11 +638,11 @@
 
             <section class="actions-section">
                 <div class="export-buttons">
-                    <button class="btn btn-pdf" id="printPdfBtn">
-                        <i class="fas fa-file-pdf"></i> Imprimer PDF
+                    <button class="btn btn-pdf" id="printPdfBtn" title="Imprimer PDF">
+                        <i class="fas fa-file-pdf"></i>
                     </button>
-                    <button class="btn btn-excel" id="printExcelBtn">
-                        <i class="fas fa-file-excel"></i> Exporter Excel
+                    <button class="btn btn-excel" id="printExcelBtn" title="Exporter Excel">
+                        <i class="fas fa-file-excel"></i>
                     </button>
                 </div>
                 <div class="pagination-controls" id="paginationControls">
@@ -655,11 +688,11 @@
 
             <section class="actions-section">
                 <div class="export-buttons">
-                    <button class="btn btn-pdf" id="printPdfInprogressBtn">
-                        <i class="fas fa-file-pdf"></i> Imprimer PDF
+                    <button class="btn btn-pdf" id="printPdfInprogressBtn" title="Imprimer PDF">
+                        <i class="fas fa-file-pdf"></i>
                     </button>
-                    <button class="btn btn-excel" id="printExcelInprogressBtn">
-                        <i class="fas fa-file-excel"></i> Exporter Excel
+                    <button class="btn btn-excel" id="printExcelInprogressBtn" title="Exporter Excel">
+                        <i class="fas fa-file-excel"></i>
                     </button>
                 </div>
                 <div class="pagination-controls" id="paginationInprogressControls">
@@ -705,11 +738,11 @@
 
             <section class="actions-section">
                 <div class="export-buttons">
-                    <button class="btn btn-pdf" id="printPdfCompletedBtn">
-                        <i class="fas fa-file-pdf"></i> Imprimer PDF
+                    <button class="btn btn-pdf" id="printPdfCompletedBtn" title="Imprimer PDF">
+                        <i class="fas fa-file-pdf"></i>
                     </button>
-                    <button class="btn btn-excel" id="printExcelCompletedBtn">
-                        <i class="fas fa-file-excel"></i> Exporter Excel
+                    <button class="btn btn-excel" id="printExcelCompletedBtn" title="Exporter Excel">
+                        <i class="fas fa-file-excel"></i>
                     </button>
                 </div>
                 <div class="pagination-controls" id="paginationCompletedControls">
@@ -760,8 +793,8 @@
                         </select>
                     </div>
                     <div class="form-group" style="align-self: flex-end;">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Ajouter à la liste d'alertes
+                        <button type="submit" class="btn btn-primary" title="Ajouter à la liste d'alertes">
+                            <i class="fas fa-plus"></i>
                         </button>
                     </div>
                 </form>
@@ -811,7 +844,7 @@
                         <option value="demande de complément envoyée">Demande de complément envoyée</option>
                         <option value="complément de dossier reçu à examiner">Complément de dossier reçu à examiner</option>
                         <option value="complément de dossier encours d'examination">Complément de dossier encours d'examination</option>
-                        <option value="échantillons envoyées à la sous commission">Échantillons envoyées à la sous commission</option>
+                        <option value="échantillons envoyés à la sous commission">Échantillons envoyés à la sous commission</option>
                         <option value="Résultat & Extrait de PV publiés">Résultat & Extrait de PV publiés</option>
                         <option value="marché en cours d'élaboration">Marché en cours d'élaboration</option>
                         <option value="marché envoyé à la société pour signature">Marché envoyé à la société pour signature</option>
@@ -1164,18 +1197,14 @@
                         <td>${item.exercise}</td>
                         <td>${item.daoNumber}</td>
                         <td class="object-cell">${item.object}</td>
-                        <td>
-                            <select class="status-select" data-id="${item.id}">
-                                ${generateStatusOptions(item.status)}
-                            </select>
-                        </td>
+                        <td class="status-cell">${formatStatusText(item.status)}</td>
                         <td class="observations-cell">${item.observations || ''}</td>
                         <td>
-                            <button class="btn btn-primary edit-btn" data-id="${item.id}">
-                                <i class="fas fa-edit"></i> Modifier
+                            <button class="btn btn-primary edit-btn" data-id="${item.id}" title="Modifier">
+                                <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-danger delete-btn" data-id="${item.id}">
-                                <i class="fas fa-trash"></i> Supprimer
+                            <button class="btn btn-danger delete-btn" data-id="${item.id}" title="Supprimer">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     `;
@@ -1196,18 +1225,31 @@
                         deleteAo(id);
                     });
                 });
-                
-                // Ajouter les écouteurs d'événements pour les sélecteurs de statut
-                document.querySelectorAll('.status-select').forEach(select => {
-                    select.addEventListener('change', function() {
-                        const id = this.getAttribute('data-id');
-                        const newStatus = this.value;
-                        updateStatus(id, newStatus);
-                    });
-                });
             }
             
             updatePagination(currentPage, filteredData.length, paginationInfo, paginationControls, renderTable);
+        }
+
+        // Formater le texte de statut pour avoir des retours à la ligne
+        function formatStatusText(status) {
+            const words = status.split(' ');
+            let lines = [];
+            let currentLine = '';
+            
+            for (let word of words) {
+                if ((currentLine + word).length <= 40) {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            
+            if (currentLine) {
+                lines.push(currentLine);
+            }
+            
+            return lines.join('<br>');
         }
 
         // Rendu du tableau (Ouverture en cours)
@@ -1223,7 +1265,7 @@
                 "demande de complément envoyée",
                 "complément de dossier reçu à examiner",
                 "complément de dossier encours d'examination",
-                "échantillons envoyées à la sous commission"
+                "échantillons envoyés à la sous commission"
             ];
             
             const inprogressData = aoData.filter(item => inprogressStatuses.includes(item.status));
@@ -1240,18 +1282,14 @@
                         <td>${item.exercise}</td>
                         <td>${item.daoNumber}</td>
                         <td class="object-cell">${item.object}</td>
-                        <td>
-                            <select class="status-select" data-id="${item.id}">
-                                ${generateStatusOptions(item.status)}
-                            </select>
-                        </td>
+                        <td class="status-cell">${formatStatusText(item.status)}</td>
                         <td class="observations-cell">${item.observations || ''}</td>
                         <td>
-                            <button class="btn btn-primary edit-btn" data-id="${item.id}">
-                                <i class="fas fa-edit"></i> Modifier
+                            <button class="btn btn-primary edit-btn" data-id="${item.id}" title="Modifier">
+                                <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-danger delete-btn" data-id="${item.id}">
-                                <i class="fas fa-trash"></i> Supprimer
+                            <button class="btn btn-danger delete-btn" data-id="${item.id}" title="Supprimer">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     `;
@@ -1270,15 +1308,6 @@
                     btn.addEventListener('click', function() {
                         const id = this.getAttribute('data-id');
                         deleteAo(id);
-                    });
-                });
-                
-                // Ajouter les écouteurs d'événements pour les sélecteurs de statut
-                document.querySelectorAll('#inprogressTableBody .status-select').forEach(select => {
-                    select.addEventListener('change', function() {
-                        const id = this.getAttribute('data-id');
-                        const newStatus = this.value;
-                        updateStatus(id, newStatus);
                     });
                 });
             }
@@ -1317,18 +1346,14 @@
                         <td>${item.exercise}</td>
                         <td>${item.daoNumber}</td>
                         <td class="object-cell">${item.object}</td>
-                        <td>
-                            <select class="status-select" data-id="${item.id}">
-                                ${generateStatusOptions(item.status)}
-                            </select>
-                        </td>
+                        <td class="status-cell">${formatStatusText(item.status)}</td>
                         <td class="observations-cell">${item.observations || ''}</td>
                         <td>
-                            <button class="btn btn-primary edit-btn" data-id="${item.id}">
-                                <i class="fas fa-edit"></i> Modifier
+                            <button class="btn btn-primary edit-btn" data-id="${item.id}" title="Modifier">
+                                <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-danger delete-btn" data-id="${item.id}">
-                                <i class="fas fa-trash"></i> Supprimer
+                            <button class="btn btn-danger delete-btn" data-id="${item.id}" title="Supprimer">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     `;
@@ -1349,50 +1374,9 @@
                         deleteAo(id);
                     });
                 });
-                
-                // Ajouter les écouteurs d'événements pour les sélecteurs de statut
-                document.querySelectorAll('#completedTableBody .status-select').forEach(select => {
-                    select.addEventListener('change', function() {
-                        const id = this.getAttribute('data-id');
-                        const newStatus = this.value;
-                        updateStatus(id, newStatus);
-                    });
-                });
             }
             
             updatePagination(currentCompletedPage, completedData.length, paginationCompletedInfo, paginationCompletedControls, renderCompletedTable, 'completed');
-        }
-
-        // Générer les options de statut
-        function generateStatusOptions(selectedStatus) {
-            const statuses = [
-                "en cours d'élaboration",
-                "déposé pour signature du Directeur",
-                "envoyé aux membres de la commission",
-                "appel d'offres publié",
-                "examen des dossier administratifs et technique",
-                "examen de la documentation technique",
-                "examen des offres techniques",
-                "examen des offres financières",
-                "demande de complément envoyée",
-                "complément de dossier reçu à examiner",
-                "complément de dossier encours d'examination",
-                "échantillons envoyées à la sous commission",
-                "Résultat & Extrait de PV publiés",
-                "marché en cours d'élaboration",
-                "marché envoyé à la société pour signature",
-                "marché envoyé pour signature de la partie technique",
-                "marché déposé pour signature du directeur",
-                "marché envoyé au Contrôleur d'Etat pour visa",
-                "marché visé reçu",
-                "marché approuvé notifié à la société",
-                "ordre de service de commencement à notifier",
-                "marché envoyé au service utilisateur"
-            ];
-            
-            return statuses.map(status => 
-                `<option value="${status}" ${status === selectedStatus ? 'selected' : ''}>${status}</option>`
-            ).join('');
         }
 
         // Mise à jour de la pagination
@@ -1563,20 +1547,6 @@
             }
         }
 
-        // Mise à jour du statut
-        async function updateStatus(id, newStatus) {
-            try {
-                await db.collection('appelsOffres').doc(id).update({
-                    status: newStatus,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                showMessage('Statut mis à jour avec succès!', 'success');
-            } catch (error) {
-                console.error('Erreur lors de la mise à jour du statut:', error);
-                showMessage('Erreur lors de la mise à jour du statut: ' + error.message, 'error');
-            }
-        }
-
         // Suppression d'un appel d'offres
         async function deleteAo(id) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cet appel d\'offres ?')) {
@@ -1655,7 +1625,12 @@
                 return;
             }
             
-            alertData.forEach(alert => {
+            // Trier les alertes par ordre décroissant (DAO N°)
+            const sortedAlerts = [...alertData].sort((a, b) => {
+                return b.daoNumber.localeCompare(a.daoNumber);
+            });
+            
+            sortedAlerts.forEach(alert => {
                 const alertElement = document.createElement('div');
                 alertElement.className = 'alert-item';
                 alertElement.innerHTML = `
@@ -1665,18 +1640,15 @@
                         <p><small>Ajouté le: ${new Date(alert.dateAdded).toLocaleDateString('fr-FR')}</small></p>
                         <div class="form-group" style="margin-top: 10px;">
                             <label for="comment-${alert.id}">Commentaire</label>
-                            <textarea id="comment-${alert.id}" placeholder="Ajouter un commentaire..." style="width: 100%;">${alert.comment || ''}</textarea>
+                            <textarea id="comment-${alert.id}" class="alert-comment" placeholder="Ajouter un commentaire...">${alert.comment || ''}</textarea>
                         </div>
                     </div>
                     <div class="alert-actions">
-                        <button class="btn btn-success save-comment-btn" data-id="${alert.id}">
-                            <i class="fas fa-save"></i> Valider
+                        <button class="btn btn-success save-comment-btn" data-id="${alert.id}" title="Valider">
+                            <i class="fas fa-save"></i>
                         </button>
-                        <button class="btn btn-primary edit-comment-btn" data-id="${alert.id}">
-                            <i class="fas fa-edit"></i> Modifier
-                        </button>
-                        <button class="btn btn-danger delete-alert-btn" data-id="${alert.id}">
-                            <i class="fas fa-trash"></i> Supprimer
+                        <button class="btn btn-danger delete-alert-btn" data-id="${alert.id}" title="Supprimer">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 `;
@@ -1767,7 +1739,7 @@
                     "demande de complément envoyée",
                     "complément de dossier reçu à examiner",
                     "complément de dossier encours d'examination",
-                    "échantillons envoyées à la sous commission"
+                    "échantillons envoyés à la sous commission"
                 ];
                 data = aoData.filter(item => inprogressStatuses.includes(item.status))
                             .map(item => [
@@ -1840,7 +1812,7 @@
                     "demande de complément envoyée",
                     "complément de dossier reçu à examiner",
                     "complément de dossier encours d'examination",
-                    "échantillons envoyées à la sous commission"
+                    "échantillons envoyés à la sous commission"
                 ];
                 data = aoData.filter(item => inprogressStatuses.includes(item.status))
                             .map(item => ({
