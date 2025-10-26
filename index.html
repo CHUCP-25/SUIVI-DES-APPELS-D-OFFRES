@@ -570,11 +570,6 @@
         <div class="container">
             <div class="header-content">
                 <h1>Suivi des Appels d'Offres</h1>
-                <div>
-    <button class="btn btn-primary" id="addBtn" title="Nouvel Appel d'Offres">
-        <i class="fas fa-plus"></i> Nouvel Appel d'Offres
-    </button>
-</div>
             </div>
         </div>
     </header>
@@ -583,6 +578,7 @@
         <div id="firebaseStatus"></div>
 
         <section class="tabs-section">
+
             <button class="tab-btn tab-overview active" data-tab="overview">
                 <i class="fas fa-chart-bar"></i> Vue d'ensemble
             </button>
@@ -595,6 +591,9 @@
             <button class="tab-btn tab-alerts" data-tab="alerts">
                 <i class="fas fa-bell"></i> Alertes
             </button>
+        <button class="btn-sky-blue" id="addBtn" title="Nouvel Appel d'Offres">
+        <i class="fas fa-plus"></i> Ajouter un nouvel Appel d'Offres
+        </button>
         </section>
 
         <!-- Vue d'ensemble -->
@@ -782,8 +781,8 @@
         <!-- Alertes -->
         <div class="tab-content" id="alerts-content">
             <section class="alert-section">
-                <h3>Gestion des Alertes</h3>
-                <p>Ajoutez des appels d'offres nécessitant une attention particulière.</p>
+                <h3>Gestion des Alertes :</h3> <h5 style="color: #FF8C00;">Ajoutez des appels d'offres nécessitant une attention particulière.</h5>
+
                 
                 <form class="alert-form" id="alertForm">
                     <div class="form-group">
@@ -862,8 +861,8 @@
                     <textarea id="observations" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: var(--border-radius);"></textarea>
                 </div>
                 <div class="form-row" style="margin-top: 20px; text-align: right;">
-                    <button type="button" class="btn btn-danger" id="cancelBtn">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="button" class="btn btn-danger" id="cancelBtn">✖</button>
+                    <button type="submit" class="btn btn-primary">💾</button>
                 </div>
             </form>
         </div>
@@ -1637,8 +1636,7 @@
                     <div class="alert-info">
                         <h4>${alert.daoNumber}</h4>
                         <p>${alert.object}</p>
-                        <p><small>Ajouté le: ${new Date(alert.dateAdded).toLocaleDateString('fr-FR')}</small></p>
-                        <div class="form-group" style="margin-top: 10px;">
+                   <div class="form-group" style="margin-top: 10px;">
                             <label for="comment-${alert.id}">Commentaire</label>
                             <textarea id="comment-${alert.id}" class="alert-comment" placeholder="Ajouter un commentaire...">${alert.comment || ''}</textarea>
                         </div>
