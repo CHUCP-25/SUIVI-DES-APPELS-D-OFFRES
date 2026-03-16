@@ -812,7 +812,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">Nouvel Appel d'Offres</h2>
-                <button class="close-btn" id="closeModal">&times;</button>
+                <button class="close-btn" id="closeModal">×</button>
             </div>
             <form id="aoForm">
                 <input type="hidden" id="editId">
@@ -1166,12 +1166,12 @@
             currentTab = tabId;
         }
 
-        // Trier les données par exercice (croissant) et DAO N° (décroissant)
+        // Trier les données par exercice (décroissant) et DAO N° (décroissant)
         function sortData() {
             aoData.sort((a, b) => {
-                // Trier par exercice (croissant)
+                // Trier par exercice (décroissant : du plus récent au plus ancien)
                 if (a.exercise !== b.exercise) {
-                    return a.exercise.localeCompare(b.exercise);
+                    return b.exercise.localeCompare(a.exercise); // décroissant
                 }
                 // Trier par DAO N° (décroissant)
                 return b.daoNumber.localeCompare(a.daoNumber);
