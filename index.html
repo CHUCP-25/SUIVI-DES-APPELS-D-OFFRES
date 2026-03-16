@@ -563,6 +563,47 @@
                 justify-content: flex-end;
             }
         }
+
+        /* Style du bouton "Ajouter un nouvel Appel d'Offres" : couleur dorée avec effet de clignotement UX/UV */
+        #addBtn {
+            background-color: #FFD700; /* Doré */
+            color: #000000; /* Texte noir pour contraste */
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            animation: goldenPulse 1.5s infinite ease-in-out;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: auto;
+            height: auto;
+        }
+
+        #addBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            animation: none; /* Arrêter le clignotement au survol */
+        }
+
+        @keyframes goldenPulse {
+            0% {
+                background-color: #FFD700;
+                box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            }
+            50% {
+                background-color: #FFC72C;
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+            }
+            100% {
+                background-color: #FFD700;
+                box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            }
+        }
     </style>
 </head>
 <body>
